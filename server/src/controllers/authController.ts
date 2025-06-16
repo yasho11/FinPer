@@ -83,24 +83,22 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 //! Desc: Authenticates user using cookie token
 //?-------------------------------------------------------------------------------
 
-export const authUser = async (req: Request, res: Response): Promise<any> => {
+export const authUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).json({ msg: 'Unauthorized: Token not found' });
-    }
-
-    const userId = verifyToken(token);
+    const userId = req.user?.id;
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+     res.status(404).json({ msg: 'User not found' });
+      return ;
     }
 
-    return res.status(200).json({ user });
+    res.json({ user });
+     return ;
   } catch (err) {
-    return res.status(401).json({ msg: 'Invalid or expired token', error: err });
-  }
+     res.status(401).json({ msg: 'Invalid or expired token', error: err });
+      return;
+    }
 };
 
 //?-----------------------------------------------------------------------------------------------
@@ -108,14 +106,14 @@ export const authUser = async (req: Request, res: Response): Promise<any> => {
 //! description: Updates user profile data
 //?-----------------------------------------------------------------------------------------------
 
-export const UpdateUser = async (req: Request, res: Response): Promise<any> => {
+export const UpdateUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const token = req.cookies?.token;
-    if (!token) return res.status(401).json({ msg: 'Unauthorized: Token not found' });
-
-    const userId = verifyToken(token);
+    const userId = req.user?.id
     const user = await User.findByPk(userId);
-    if (!user) return res.status(404).json({ msg: 'User not found' });
+    if (!user) {
+      res.status(404).json({ msg: 'User not found' });
+      return;
+    }
 
     const { username, avatar, gender, password } = req.body;
 
